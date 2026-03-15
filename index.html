@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GainzLab | Fitness & Performance</title>
+    <style>
+        :root {
+            --ana-mavi: #2980b9;
+            --yesil-parlak: #2ecc71;
+            --siyah: #000000;
+            --arka-plan: #e8f5e9;
+            --ayirici: #27ae60;
+            --sari-menu: #f1c40f;
+            --card-bg: #ffffff;
+            --danger: #e74c3c;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--arka-plan); display: flex; min-height: 100vh; }
+        
+        .page-content { flex: 1; display: none; flex-direction: column; }
+        .active-page { display: flex; }
+
+        /* Sidebar */
+        .sidebar { width: 220px; background: var(--sari-menu); color: var(--siyah); height: 100vh; padding: 20px; position: sticky; top: 0; display: flex; flex-direction: column; border-right: 2px solid var(--siyah); box-sizing: border-box; }
+        .menu-box { background: white; padding: 10px; margin: 8px 0; border-radius: 5px; text-align: center; border: 2px solid var(--siyah); font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .menu-box:hover { transform: scale(1.05); }
+
+        header { background-color: var(--ana-mavi); padding: 1.5rem; text-align: center; color: white; border-bottom: 3px solid var(--ayirici); }
+        header h1 { font-size: 3rem; margin: 0; text-transform: uppercase; font-weight: 900; }
+        .gainz { color: var(--yesil-parlak); }
+        .lab { color: var(--siyah); }
+
+        /* Dashboard & Hesaplayıcılar */
+        .calculator-container { display: flex; flex-wrap: wrap; gap: 20px; padding: 20px; justify-content: center; }
+        .calc-card { background: white; border: 3px solid var(--ayirici); border-radius: 10px; padding: 20px; width: 350px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .calc-card h2 { font-size: 1.2rem; text-align: center; border-bottom: 2px solid var(--ana-mavi); padding-bottom: 10px; margin-bottom: 15px; }
+        
+        input, select { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .btn-calc { width: 100%; background: var(--ana-mavi); color: white; border: none; padding: 12px; cursor: pointer; font-weight: bold; border-radius: 5px; transition: 0.3s; }
+        .btn-calc:hover { background: var(--siyah); }
+
+        .result-box { background: #f8f9fa; border-left: 5px solid var(--yesil-parlak); padding: 10px; margin-top: 15px; font-size: 0.9rem; }
+
+        /* Suplementler */
+        .sup-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 30px; }
+        .sup-card { background: var(--card-bg); border: 2px solid var(--ayirici); border-radius: 12px; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .sup-header { background: #f9f9f9; padding: 12px; border-bottom: 1px solid var(--ayirici); display: flex; justify-content: space-between; align-items: center; }
+        .sup-body { padding: 15px; font-size: 0.85rem; line-height: 1.4; }
+        .info-btn { background: var(--ana-mavi); color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; font-weight: bold; }
+        .details-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); color: white; display: none; padding: 20px; box-sizing: border-box; flex-direction: column; justify-content: center; z-index: 10; }
+        .details-overlay.active { display: flex; }
+
+        /* Program Tablosu */
+        .program-table { margin: 20px 40px; border-collapse: collapse; background: white; border: 2px solid var(--ayirici); }
+        .program-table th { background: var(--ana-mavi); color: white; padding: 12px; }
+        .program-table td { border: 1px solid #ddd; padding: 12px; text-align: center; font-size: 0.9rem; }
+        .prog-title { margin-left: 40px; margin-top: 30px; color: var(--ana-mavi); border-left: 5px solid var(--yesil-parlak); padding-left: 10px; }
+
+        .about-section { padding: 40px; line-height: 1.8; color: #333; max-width: 800px; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h3>Gainz Menü</h3>
+        <div class="menu-box" onclick="sayfaDegistir('anaSayfa')">Ana Sayfa</div>
+        <div class="menu-box" onclick="sayfaDegistir('programlarSayfasi')">Programlar</div>
+        <div class="menu-box" onclick="sayfaDegistir('suplementSayfasi')">Suplementler</div>
+        <div class="menu-box" onclick="sayfaDegistir('steroidSayfasi')">Steroidler</div>
+        <div class="menu-box" onclick="sayfaDegistir('hakkimizdaSayfasi')">Hakkımızda</div>
+        <div style="margin-top:auto; font-size:0.7rem;">
+            <p>İletişim: anilesmerli.3541@gmail.com</p>
+        </div>
+    </div>
+
+    <div id="anaSayfa" class="page-content active-page">
+        <header><h1><span class="gainz">Gainz</span><span class="lab">Lab</span></h1></header>
+        
+        <div class="calculator-container">
+            <div class="calc-card">
+                <h2>🎯 Hedef & Kalori Hesapla</h2>
+                <input type="number" id="yas" placeholder="Yaş">
+                <input type="number" id="kilo" placeholder="Kilo (kg)">
+                <input type="number" id="boy" placeholder="Boy (cm)">
+                <select id="cinsiyet">
+                    <option value="erkek">Erkek</option>
+                    <option value="kadin">Kadın</option>
+                </select>
+                <select id="aktivite">
+                    <option value="1.2">Hareketsiz (Masa başı)</option>
+                    <option value="1.375">Hafif Aktif (Haftada 1-3 gün spor)</option>
+                    <option value="1.55">Orta Aktif (Haftada 3-5 gün spor)</option>
+                    <option value="1.725">Çok Aktif (Haftada 6-7 gün ağır spor)</option>
+                </select>
+                <select id="hedef">
+                    <option value="yagYak">Yağ Yakmak İstiyorum (-500 kcal)</option>
+                    <option value="koru">Kilomu Korumak İstiyorum</option>
+                    <option value="kasEkle">Kas Eklemek İstiyorum (+500 kcal)</option>
+                </select>
+                <button class="btn-calc" onclick="hesaplaHedef()">HEDEFİ HESAPLA</button>
+                <div id="hedefSonuc" class="result-box">Sonuçlar burada görünecek...</div>
+            </div>
+
+            <div class="calc-card">
+                <h2>🍎 Besin Kalori Cetveli</h2>
+                <select id="besinSec">
+                    <option value="1.65">Tavuk Göğsü (100g) - 165 kcal</option>
+                    <option value="2.50">Dana Antrikot (100g) - 250 kcal</option>
+                    <option value="1.30">Pirinç Pilavı (100g) - 130 kcal</option>
+                    <option value="3.60">Yulaf Ezmesi (100g) - 360 kcal</option>
+                    <option value="0.70">Haşlanmış Yumurta (Adet) - 70 kcal</option>
+                    <option value="1.16">Makarna (100g Haşlanmış) - 116 kcal</option>
+                    <option value="5.70">Fıstık Ezmesi (100g) - 570 kcal</option>
+                </select>
+                <input type="number" id="miktar" placeholder="Miktar (Gram veya Adet)">
+                <button class="btn-calc" onclick="hesaplaBesin()">LİSTEYE EKLE</button>
+                <div id="besinTablo" class="result-box">
+                    <strong>Öğün Toplamı:</strong> <span id="toplamKalori">0</span> kcal
+                    <ul id="besinListesi" style="font-size: 0.8rem; padding-left: 15px;"></ul>
+                </div>
+            </div>
+
+            <div class="calc-card">
+                <h2>📊 Vücut Analiz Laboratuvarı</h2>
+                <input type="number" id="bel" placeholder="Bel (cm)">
+                <input type="number" id="boyun" placeholder="Boyun (cm)">
+                <input type="number" id="boyYağ" placeholder="Boy (cm)">
+                <button class="btn-calc" onclick="hesaplaYag()">YAĞ ORANI HESAPLA</button>
+                <div id="yagVal" class="result-box" style="font-weight:bold; text-align:center;">Yağ: %--</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="programlarSayfasi" class="page-content">
+        <header><h1><span class="gainz">Gainz</span><span class="lab">Lab</span> | PROGRAMLAR</h1></header>
+        <h3 style="text-align:center; margin-top:20px; color: var(--danger);">✅ Anıl Hoca & Ahmet Hoca Onaylı Full Body</h3>
+        <table class="program-table">
+            <tr><th>Kas Grubu</th><th>Hareket 1</th><th>Hareket 2</th><th>Set & Tekrar</th></tr>
+            <tr><td><b>Göğüs</b></td><td>Bench Press</td><td>Pec Fly</td><td>3 x 8-12</td></tr>
+            <tr><td><b>Sırt</b></td><td>Lat Pull Down</td><td>Close Grip Pull Down</td><td>3 x 8-12</td></tr>
+            <tr><td><b>Omuz</b></td><td>Shoulder Press</td><td>Lateral Raise</td><td>3 x 8-12 (Lateral 15)</td></tr>
+            <tr><td><b>Triceps</b></td><td>Rope Push Down</td><td>Skull Crusher</td><td>3 x 8-12</td></tr>
+            <tr><td><b>Biceps</b></td><td>Barbell Curl</td><td>Preacher Curl</td><td>3 x 8-12</td></tr>
+        </table>
+        </div>
+
+    <div id="suplementSayfasi" class="page-content">
+        <header><h1><span class="gainz">Gainz</span><span class="lab">Lab</span> | SUPLEMENT KÜTÜPHANESİ</h1></header>
+        <div class="sup-container" id="sup-list-container"></div>
+    </div>
+
+    <div id="steroidSayfasi" class="page-content">
+        <header><h1><span class="gainz">Gainz</span><span class="lab">Lab</span> | LAB ANALİZ</h1></header>
+        <div class="sup-container" id="stero-container"></div>
+    </div>
+
+    <div id="hakkimizdaSayfasi" class="page-content">
+        <header><h1><span class="gainz">Gainz</span><span class="lab">Lab</span> | BİZ KİMİZ?</h1></header>
+        <div class="about-section">
+            <h2>GainzLab Vizyonu</h2>
+            <p>Anıl Hoca ve Ahmet Hoca liderliğinde kurulan GainzLab, sporcuların genetik sınırlarını zorlaması için gerekli olan bilimsel veriyi ve tecrübeyi bir araya getirir.</p>
+        </div>
+    </div>
+
+    <script>
+        // SUPLEMENT VERİLERİ (Değiştirilmedi)
+        const supplements = [
+            {ad: "Whey Protein Isolate", etki: "En hızlı sindirilen protein türüdür. Antrenman sonrası kas fibrillerindeki mikro yırtıkları onarmak için kana hızla karışır.", icerik: "Servis başı 25g Protein, 0g Şeker, 0g Yağ. Cross-flow microfiltration yöntemiyle üretilmiştir."},
+            {ad: "Kreatin Monohidrat", etki: "Kaslardaki ATP depolarını yenileyerek patlayıcı güç artışı sağlar. Hücre içi su tutumunu artırarak hipertrofiyi destekler.", icerik: "%100 Saf Creapure ham maddesi. Mikronize yapısıyla kolay çözünürlük."},
+            {ad: "Beta-Alanine", etki: "Kas içi karnozin seviyesini artırarak laktik asit birikimini geciktirir.", icerik: "3.2g saf Beta-Alanine. Parestesi (karıncalanma) etkisi normaldir."},
+            {ad: "Citrulline Malate 2:1", etki: "Nitrik oksit seviyesini artırarak damar genişlemesini sağlar. Muazzam bir pump hissi sunar.", icerik: "6g Citrulline Malate. Malat formu ATP üretimini hızlandırır."},
+            {ad: "BCAA 4:1:1", etki: "Lösin ağırlıklı formülüyle mTor sinyalini tetikler ve kas yıkımını minimuma indirir.", icerik: "Servis başı 6g BCAA. 4 birim Lösin içerir."},
+            {ad: "Ashwagandha (KSM-66)", etki: "Adaptojenik bir bitkidir. Kortizol (stres hormonu) seviyesini düşürür.", icerik: "600mg KSM-66 patentli kök ekstresi."},
+            {ad: "Omega-3 (Yüksek EPA/DHA)", etki: "Eklem sağlığını korur, kalp-damar sistemini destekler.", icerik: "1000mg Balık Yağı (360mg EPA, 240mg DHA)."},
+            {ad: "ZMA", etki: "Derin uyku (REM) kalitesini artırır. Hormon sentezini destekler.", icerik: "Magnezyum Sitrat, Çinko Monometiyonin, Vitamin B6."}
+        ];
+
+        // 23 DETAYLI STEROID VERİSİ (Yan Etki ve Risk Oranları Eklendi)
+        const steroids = [
+            {ad: "Testosteron Enanthate", etki: "Kas kütlesi ve güç artışı, recovery.", icerik: "250mg/ml Long Ester Testo. Yarı ömrü 7-10 gündür.", yanEtki: "Su tutumu, akne, saç dökülmesi, östrojen artışı.", risk: "Düşük - Orta"},
+            {ad: "Trenbolone Acetate", etki: "Aşırı sertlik, yağ yakımı, güç.", icerik: "100mg/ml Short Ester Tren. Yarı ömrü 2-3 gündür.", yanEtki: "Şiddetli uykusuzluk, agresyon, gece terlemeleri, böbrek stresi.", risk: "Çok Yüksek"},
+            {ad: "Anavar (Oxandrolone)", etki: "Yağsız kas kütlesi, güç, definasyon.", icerik: "10mg Oral Tablet. Karaciğer üzerinden metabolize olur.", yanEtki: "Hafif karaciğer stresi, lipid (kolesterol) profilinde bozulma.", risk: "Düşük"},
+            {ad: "Dianabol (Dbol)", etki: "Hızlı güç ve devasa hacim kazanımı.", icerik: "Metandienone oral tablet. Protein sentezini aniden patlatır.", yanEtki: "Yüksek tansiyon, şiddetli su tutumu, jinekomasti, karaciğer toksisitesi.", risk: "Yüksek"},
+            {ad: "Deca-Durabolin", etki: "Eklem sağlığı ve uzun vadeli kalıcı kütle.", icerik: "Nandrolone Decanoate. Yarı ömrü uzundur (15 gün).", yanEtki: "Prolaktin yüksekliği, libido kaybı (Deca Dick), su tutumu.", risk: "Orta"},
+            {ad: "Winstrol (Stanozolol)", etki: "Yüksek damarlanma, kuruluk ve sertlik.", icerik: "Su bazlı veya oral form. SHBG yi düşürerek serbest testoyu artırır.", yanEtki: "Eklemlerde kuruluk ve ağrı, karaciğer hasarı, saç dökülmesi.", risk: "Orta - Yüksek"},
+            {ad: "Masteron", etki: "Anti-östrojenik definasyon ve kas sertliği.", icerik: "Drostanolone Propionate. DHT türevidir.", yanEtki: "Genetik yatkınlık varsa kesin saç dökülmesi, prostat büyümesi.", risk: "Düşük - Orta"},
+            {ad: "Primobolan", etki: "Temiz ve korumalı kütle artışı, diyette kas koruma.", icerik: "Methenolone Enanthate. Pahalı ve hafif bir anaboliktir.", yanEtki: "Doğal üretimi hafif baskılar, ciddi bir yan etkisi nadirdir.", risk: "Çok Düşük"},
+            {ad: "Boldenone (Equipoise)", etki: "Dayanıklılık, vaskülarite ve iştah artışı.", icerik: "Veterinerlikten gelme uzun esterli anabolik ajan.", yanEtki: "Kırmızı kan hücresi sayısında (hematokrit) aşırı artış, anksiyete.", risk: "Orta"},
+            {ad: "Anadrol (Oxymetholone)", etki: "Devasa güç artışı ve patlayıcı hacim.", icerik: "Ağır oral steroid. Kırmızı kan üretimini inanılmaz hızlandırır.", yanEtki: "Ağır karaciğer hasarı, tansiyon fırlaması, şiddetli baş ağrısı.", risk: "Çok Yüksek"},
+            {ad: "Halotestin", etki: "Saf agresyon, ağırlık artışı ve yarışma öncesi sertlik.", icerik: "Fluoxymesterone. Güç sporcuları tarafından maç öncesi kullanılır.", yanEtki: "Aşırı karaciğer toksisitesi, kontrol edilemeyen öfke.", risk: "Ekstrem (Çok Yüksek)"},
+            {ad: "T3 (Cytomel)", etki: "Hızlandırılmış bazal metabolizma ve yağ yakımı.", icerik: "Sentetik tiroid hormonu. Metabolizmayı suni olarak hızlandırır.", yanEtki: "Kas yıkımı (katabolizma), kalıcı tiroid tembelliği, çarpıntı.", risk: "Yüksek"},
+            {ad: "Clenbuterol", etki: "Güçlü termojenik yağ yakıcı ve solunum açıcı.", icerik: "Beta-2 reseptör agonisti. Astım ilacı türevidir.", yanEtki: "Ellerde titreme (tremor), taşikardi, şiddetli kas krampları.", risk: "Orta - Yüksek"},
+            {ad: "Sustanon 250", etki: "Kademeli salınımlı testosteron artışı.", icerik: "4 farklı testosteron esterinin karışımı (Propionate, Phenylpropionate, Isocaproate, Decanoate).", yanEtki: "Kanda dalgalanma yaptığı için sivilce, jinekomasti riski.", risk: "Orta"},
+            {ad: "Turinabol (Tbol)", etki: "Su tutmadan saf kas ve atletik performans.", icerik: "Dianabolün su tutmayan kardeşi olarak bilinir.", yanEtki: "Karaciğer enzimlerinde artış, lipid dengesizliği.", risk: "Orta"},
+            {ad: "Proviron", etki: "Serbest testosteronu artırır ve kürü destekler.", icerik: "Mesterolone. Östrojene dönüşümü engeller.", yanEtki: "Prostat riski, DHT kaynaklı saç dökülmesi.", risk: "Düşük"},
+            {ad: "NPP", etki: "Hızlı hacim ve deca'ya göre daha az su tutumu.", icerik: "Nandrolone Phenylpropionate. Hızlı çalışan Nandrolone esteri.", yanEtki: "Prolaktin dalgalanması, doğal testosteron baskılanması.", risk: "Orta"},
+            {ad: "Superdrol", etki: "Kısa sürede devasa güç ve kuru kütle.", icerik: "Methasterone. Tasarımcı steroidi (Designer Steroid).", yanEtki: "Hızlı karaciğer yetmezliği riski, aşırı halsizlik (letarji).", risk: "Ekstrem (Çok Yüksek)"},
+            {ad: "Growth Hormone (HGH)", etki: "Hücre yenilenmesi, yağ yakımı, yeni kas hücresi inşası.", icerik: "İnsan Büyüme Hormonu (Somatropin).", yanEtki: "İnsülin direnci oluşturma, organ ve çene büyümesi.", risk: "Orta (Uzun vadede yüksek)"},
+            {ad: "IGF-1 LR3", etki: "Bölgesel kas gelişimi ve hiperplazi (hücre bölünmesi).", icerik: "İnsülin benzeri büyüme faktörü.", yanEtki: "Hipoglisemi riski, bağırsak büyümesi.", risk: "Yüksek"},
+            {ad: "Insulin", etki: "Besinleri doğrudan hücreye zorla sokar, en anabolik hormondur.", icerik: "Hızlı etkili peptid hormon.", yanEtki: "Ölümcül hipoglisemi (şeker düşmesi) koması, aşırı yağlanma.", risk: "Ölümcül (En Yüksek)"},
+            {ad: "DNP", etki: "Hücresel düzeyde metabolizmayı kavurarak yağ yakar.", icerik: "2,4-Dinitrophenol. Aslında bir endüstriyel kimyasaldır.", yanEtki: "Vücut ısısının durdurulamaz şekilde artması, katarakt, ölüm.", risk: "Ölümcül (En Yüksek)"},
+            {ad: "Methyltestosterone", etki: "Antrenman öncesi ani güç ve agresyon.", icerik: "Oral yolla alınan testosteron türevi.", yanEtki: "Ağır karaciğer hasarı, aşırı östrojen dönüşümü.", risk: "Yüksek"}
+        ];
+
+        // SAYFA DEĞİŞTİRME
+        function sayfaDegistir(id) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active-page'));
+            document.getElementById(id).classList.add('active-page');
+        }
+
+        // HEDEF HESAPLAYICI
+        function hesaplaHedef() {
+            const yas = parseInt(document.getElementById('yas').value);
+            const kilo = parseFloat(document.getElementById('kilo').value);
+            const boy = parseFloat(document.getElementById('boy').value);
+            const cinsiyet = document.getElementById('cinsiyet').value;
+            const aktivite = parseFloat(document.getElementById('aktivite').value);
+            const hedef = document.getElementById('hedef').value;
+
+            if(!yas || !kilo || !boy) return alert("Lütfen tüm alanları doldurun!");
+
+            let bmr = cinsiyet === "erkek" 
+                ? (10 * kilo) + (6.25 * boy) - (5 * yas) + 5 
+                : (10 * kilo) + (6.25 * boy) - (5 * yas) - 161;
+
+            let tdee = bmr * aktivite;
+            let finalKalori = hedef === "yagYak" ? tdee - 500 : (hedef === "kasEkle" ? tdee + 500 : tdee);
+
+            document.getElementById('hedefSonuc').innerHTML = `
+                <strong>Günlük İhtiyacın (TDEE):</strong> ${Math.round(tdee)} kcal<br>
+                <strong style="color:var(--danger)">Hedef Kalorin: ${Math.round(finalKalori)} kcal</strong><br>
+                <small>Makro Tahmini: ${Math.round(kilo*2)}g Protein, ${Math.round(kilo*0.8)}g Yağ</small>
+            `;
+        }
+
+        // BESİN HESAPLAYICI
+        let toplamKalori = 0;
+        function hesaplaBesin() {
+            const besin = document.getElementById('besinSec');
+            const miktar = parseFloat(document.getElementById('miktar').value);
+            if(!miktar) return alert("Miktar girin!");
+
+            const kalori = (besin.value * miktar).toFixed(0);
+            toplamKalori += parseInt(kalori);
+
+            const liste = document.getElementById('besinListesi');
+            const item = document.createElement('li');
+            item.innerText = `${besin.options[besin.selectedIndex].text.split('(')[0]} (${miktar}g/ad): ${kalori} kcal`;
+            liste.appendChild(item);
+
+            document.getElementById('toplamKalori').innerText = toplamKalori;
+        }
+
+        // YAĞ ORANI HESAPLAYICI
+        function hesaplaYag() {
+            const bel = document.getElementById('bel').value;
+            const boyun = document.getElementById('boyun').value;
+            const boy = document.getElementById('boyYağ').value;
+            if(!bel || !boyun || !boy) return alert("Eksik ölçü!");
+            const sonuc = (495 / (1.0324 - 0.19077 * Math.log10(bel - boyun) + 0.15456 * Math.log10(boy)) - 450).toFixed(1);
+            document.getElementById('yagVal').innerText = "Vücut Yağ Oranı: %" + sonuc;
+        }
+
+        // KARTLARI YÜKLE (Geliştirilmiş Yapı)
+        function kartYukle(liste, containerId, renkVar, isSteroid = false) {
+            const container = document.getElementById(containerId);
+            liste.forEach(item => {
+                
+                // Sağ taraftaki butonları oluşturan kısım
+                let butonlar = `
+                    <div style="display:flex; flex-direction:column; gap:5px; min-width:90px;">
+                        <button class="info-btn" style="background:var(${renkVar}); width:100%;" data-icerik="${item.icerik}" onclick="detayGoster(this)">DETAYLAR</button>
+                `;
+                
+                // Eğer sayfa steroid sayfasıysa ekstra butonları ekle
+                if (isSteroid) {
+                    butonlar += `
+                        <button class="info-btn" style="background:#f39c12; width:100%; color:#000;" onclick="riskGoster(this, '${item.risk}')">RİSK ORANI</button>
+                        <button class="info-btn" style="background:#8e44ad; width:100%;" onclick="yanEtkiGoster(this, '${item.yanEtki}')">YAN ETKİ</button>
+                    `;
+                }
+                butonlar += `</div>`;
+
+                // Kartın HTML şablonu
+                container.innerHTML += `
+                    <div class="sup-card" style="border-color:var(${renkVar})">
+                        <div class="sup-header">
+                            <h3 style="color:var(${renkVar}); font-size:1rem; margin:0;">${item.ad}</h3>
+                            ${butonlar}
+                        </div>
+                        <div class="sup-body"><b>Ana Etki:</b> ${item.etki}</div>
+                        
+                        <div class="details-overlay">
+                            <h4 class="overlay-baslik" style="color:var(--yesil-parlak)">🧪 Teknik Analiz</h4>
+                            <p class="overlay-icerik" style="font-size:0.8rem;">${item.icerik}</p>
+                            <button onclick="kapatDetail(this)" style="background:white; border:none; padding:8px; cursor:pointer; font-weight:bold; border-radius:5px; margin-top:10px; color:black;">Anlaşıldı</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // BUTON FONKSİYONLARI
+        function detayGoster(btn) {
+            const card = btn.closest('.sup-card');
+            const overlay = card.querySelector('.details-overlay');
+            overlay.querySelector('.overlay-baslik').innerText = "🧪 Teknik Analiz";
+            overlay.querySelector('.overlay-baslik').style.color = "var(--yesil-parlak)";
+            overlay.querySelector('.overlay-icerik').innerText = btn.getAttribute('data-icerik');
+            overlay.classList.add('active');
+        }
+
+        function riskGoster(btn, riskDerecesi) {
+            const card = btn.closest('.sup-card');
+            const overlay = card.querySelector('.details-overlay');
+            overlay.querySelector('.overlay-baslik').innerText = "⚠️ Risk Analizi";
+            overlay.querySelector('.overlay-baslik').style.color = "#f39c12"; // Sarı/Turuncu
+            overlay.querySelector('.overlay-icerik').innerHTML = "<strong style='font-size:1.1rem;'>Risk Seviyesi: " + riskDerecesi + "</strong>";
+            overlay.classList.add('active');
+        }
+
+        function yanEtkiGoster(btn, yanEtkiler) {
+            const card = btn.closest('.sup-card');
+            const overlay = card.querySelector('.details-overlay');
+            overlay.querySelector('.overlay-baslik').innerText = "☣️ Yan Etkiler";
+            overlay.querySelector('.overlay-baslik').style.color = "#c0392b"; // Kırmızımsı Mor
+            overlay.querySelector('.overlay-icerik').innerText = yanEtkiler;
+            overlay.classList.add('active');
+        }
+
+        function kapatDetail(btn) {
+            btn.closest('.details-overlay').classList.remove('active');
+        }
+
+        window.onload = () => {
+            kartYukle(supplements, 'sup-list-container', '--ayirici');
+            // true parametresi Steroid olduğunu belirtir, butonları aktif eder.
+            kartYukle(steroids, 'stero-container', '--danger', true); 
+        };
+    </script>
+</body>
+</html>
